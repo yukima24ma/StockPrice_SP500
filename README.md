@@ -8,7 +8,7 @@ A machine learning portfolio project that compares seven classification models f
 
 ## Research Question
 
-Can historical S&P 500 price patterns and technical indicators predict whether the index will go up or down over the next 1, 7, or 30 trading days?
+Can historical S&P 500 price patterns, technical indicators, and macroeconomic features predict whether the index will go up or down over the next 1, 7, or 30 trading days?
 
 ---
 
@@ -24,7 +24,9 @@ trading_model/
 │   │   ├── eda_overview.png
 │   │   ├── model_comparison.png
 │   │   ├── confusion_matrices.png
-│   │   └── backtest.png
+│   │   ├── feature_importance.png
+│   │   ├── backtest.png
+│   │   └── backtest_dca.png
 │   └── model_results.csv
 │
 ├── README.md
@@ -54,13 +56,23 @@ Two naive baselines are included for comparison:
 
 ## Features
 
-All features are derived from historical price and volume data only (no external data sources):
+27 features derived from two sources:
 
+**Price & Volume (16 features)**
 - **Momentum returns**: 1-day, 5-day, 7-day, 21-day, 30-day percentage changes
 - **Trend indicators**: Price-to-MA ratios (MA5, MA20, MA50, MA200)
 - **Volatility**: Rolling standard deviation of daily returns (5, 20, 60-day windows)
 - **Volume**: 1-day and 5-day volume percentage changes
 - **Calendar**: Day of week, month
+
+**External Macro (11 features)**
+| Series | Ticker | Features |
+|---|---|---|
+| VIX | `^VIX` | Level, 1-day change, ratio to 20-day MA |
+| 10Y Treasury Yield | `^TNX` | Level, yield curve spread (10Y − T-bill), 5-day change |
+| 13-week T-bill | `^IRX` | Used to compute yield curve slope |
+| US Dollar Index | `DX-Y.NYB` | 1-day return, ratio to 20-day MA |
+| WTI Crude Oil | `CL=F` | 1-day return, 5-day return, ratio to 20-day MA |
 
 ---
 
@@ -70,6 +82,17 @@ All features are derived from historical price and volume data only (no external
 - **Hyperparameter tuning**: `RandomizedSearchCV` with `TimeSeriesSplit` (5 folds)
 - **Metrics**: Accuracy, Precision, Recall, F1-score, ROC-AUC
 - **No random shuffling** — strictly time-based to avoid look-ahead bias
+
+---
+
+## Backtesting
+
+Two backtest strategies are compared against buy-and-hold using a $100 budget:
+
+- **Model Strategy** — invest $100 on day one; hold when the best tuned model predicts up, move to cash when it predicts down
+- **DCA (Dollar-Cost Averaging)** — invest equal monthly instalments spread over the full test period
+
+The comparison illustrates the trade-off between lump-sum investing, active model-guided timing, and systematic DCA.
 
 ---
 
@@ -84,4 +107,6 @@ jupyter notebook sp500_direction_prediction.ipynb
 
 ## Key Findings
 
-Although hyperparameter tuning and some gradient boosting models achieved slightly higher ROC-AUC scores than the naive baselines, the overall improvement was limited. This is consistent with the efficient market hypothesis — short-term S&P 500 direction is difficult to predict from price history alone. More advanced features (VIX, treasury yields, macroeconomic indicators) may improve future versions.
+Adding external macro features (VIX, Treasury yields, yield curve, DXY, oil) improved model performance over price-only features, with VIX and yield-related signals ranking highest in tree-based feature importance. However, overall ROC-AUC remained modest (0.52–0.58 on the 1-day horizon), consistent with the efficient market hypothesis — short-term S&P 500 direction is difficult to predict from publicly available data alone.
+
+In the backtest, Buy & Hold outperformed both the model strategy and DCA over the 2020–present test window, highlighting that a model with limited predictive accuracy cannot reliably time the market well enough to beat a simple long position. DCA finished below Buy & Hold as expected in a rising market, but offers reduced timing risk for real-world investors.
