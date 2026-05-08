@@ -17,8 +17,7 @@ Can historical S&P 500 price patterns and technical indicators predict whether t
 ```
 trading_model/
 │
-├── notebooks/
-│   └── sp500_direction_prediction.ipynb   ← main notebook
+├── sp500_direction_prediction.ipynb   ← main notebook
 │
 ├── outputs/
 │   ├── figures/
@@ -68,6 +67,7 @@ All features are derived from historical price and volume data only (no external
 ## Evaluation
 
 - **Train/test split**: chronological — trained on 1990–2019, tested on 2020–present
+- **Hyperparameter tuning**: `RandomizedSearchCV` with `TimeSeriesSplit` (5 folds)
 - **Metrics**: Accuracy, Precision, Recall, F1-score, ROC-AUC
 - **No random shuffling** — strictly time-based to avoid look-ahead bias
 
@@ -84,4 +84,4 @@ jupyter notebook sp500_direction_prediction.ipynb
 
 ## Key Findings
 
-Although some gradient boosting models achieved slightly higher ROC-AUC scores than the naive baselines, the overall improvement was limited. This is consistent with the efficient market hypothesis — short-term S&P 500 direction is difficult to predict from price history alone. More advanced features (VIX, treasury yields, macroeconomic indicators) may improve future versions.
+Although hyperparameter tuning and some gradient boosting models achieved slightly higher ROC-AUC scores than the naive baselines, the overall improvement was limited. This is consistent with the efficient market hypothesis — short-term S&P 500 direction is difficult to predict from price history alone. More advanced features (VIX, treasury yields, macroeconomic indicators) may improve future versions.
